@@ -88,6 +88,7 @@ typedef enum Color
   ORANGE = 8,
   RED = 9,
   WHITE = 10,
+  NUM_COLOR,
   NONE = 255
 };
 

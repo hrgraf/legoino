@@ -1,0 +1,14 @@
+{
+	"folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "examples\\BoostHubDeviceInfo"
+        },
+        {
+            "path": "examples\\BoostHubDistanceSensor"
+        }
+    ],
+    "settings": {}
+}
