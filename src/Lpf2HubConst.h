@@ -208,10 +208,11 @@ typedef enum Color
   ORANGE = 8,
   RED = 9,
   WHITE = 10,
+  NUM_COLOR,
   NONE = 255
 };
 
-static const char *COLOR_STRING[] = {
+static const char *COLOR_STRING[NUM_COLOR] = {
     "black", "pink", "purple", "blue", "lightblue", "cyan", "green", "yellow", "orange", "red", "white"};
 
 enum struct DuploTrainBaseSound
