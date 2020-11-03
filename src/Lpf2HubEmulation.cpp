@@ -14,6 +14,10 @@
 
 #include "Lpf2HubEmulation.h"
 
+#define VERBOSE
+#undef log_d
+#define log_d(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(D, format), ##__VA_ARGS__)
+
 class Lpf2HubServerCallbacks : public NimBLEServerCallbacks
 {
 
@@ -57,7 +61,15 @@ public:
 
     if (msgReceived.length() > 0)
     {
+#ifdef VERBOSE
+      int len = msgReceived.length();
+      Serial.printf("message received (%d bytes):", len);
+      for (int i=0; i<len; i++)
+        Serial.printf(" %02X", msgReceived[i]);
+      Serial.println();
+#else      
       log_d("message received: %s", msgReceived.c_str());
+#endif
 
       // handle port mode information requests and respond dependent on the device type
       if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_MODE_INFORMATION_REQUEST)
@@ -247,7 +259,7 @@ void Lpf2HubEmulation::detachDevice(byte port)
   payload.push_back((char)Event::DETACHED_IO);
   writeValue(MessageType::HUB_ATTACHED_IO, payload);
 
-  log_d("port: %x", port);
+  log_d("detach port: %x", port);
 
   bool hasReachedRemovedIndex = false;
   for (int i = 0; i < numberOfConnectedDevices; i++)
@@ -274,7 +286,7 @@ byte Lpf2HubEmulation::getDeviceTypeForPort(byte portNumber)
   log_d("Number of connected devices: %d", numberOfConnectedDevices);
   for (int idx = 0; idx < numberOfConnectedDevices; idx++)
   {
-    log_v("device %d, port number: %x, device type: %x, callback address: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType, connectedDevices[idx].Callback);
+    log_v("device %d, port number: %x, device type: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType);
     if (connectedDevices[idx].PortNumber == portNumber)
     {
       log_d("device on port %x has type %x", portNumber, connectedDevices[idx].DeviceType);
@@ -298,7 +310,15 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
   {
     pCharacteristic->notify();
   }
+#ifdef VERBOSE
+  int len = message.length();
+  Serial.printf("write message (%d bytes):", len);
+  for (int i=0; i<len; i++)
+  Serial.printf(" %02X", message[i]);
+  Serial.println();
+#else
   log_d("write message (%d): %s", message.length(), message);
+#endif
 }
 
 void Lpf2HubEmulation::setHubButton(bool pressed)
