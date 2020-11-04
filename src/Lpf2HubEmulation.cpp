@@ -430,7 +430,13 @@ void Lpf2HubEmulation::start()
   _pAdvertising->setMaxInterval(64);//0.625ms units -> 40ms
 
   std::string manufacturerData;
-  if (_hubType == HubType::POWERED_UP_HUB)
+  if (_hubType == HubType::BOOST_MOVE_HUB)
+  {
+    log_d("Boost Move Hub");
+    const char controlPlusHub[8] = {0x97, 0x03, 0x00, 0x40, 0x06, 0x00, 0x41, 0x00};
+    manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
+  }
+  else if (_hubType == HubType::POWERED_UP_HUB)
   {
     log_d("PoweredUp Hub");
     const char poweredUpHub[8] = {0x97, 0x03, 0x00, 0x41, 0x07, 0x1D, 0x63, 0x00};
@@ -443,7 +449,8 @@ void Lpf2HubEmulation::start()
     manufacturerData = std::string(controlPlusHub, sizeof(controlPlusHub));
   }
   NimBLEAdvertisementData advertisementData = NimBLEAdvertisementData();
-  advertisementData.setManufacturerData(manufacturerData);
+  if (!manufacturerData.empty())
+    advertisementData.setManufacturerData(manufacturerData);
   advertisementData.setCompleteServices(NimBLEUUID(LPF2_UUID));
   // scan response data is needed because the uuid128 and manufacturer data takes almost all space in the advertisement data
   // the name is therefore stored in the scan response data
@@ -500,6 +507,29 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
       break;
     }
   }
+  else if (deviceType == DeviceType::MOVE_HUB_TILT_SENSOR)
+  {
+    log_d("get port info hub tilt: %x", informationType);
+    switch (informationType)
+    {
+    case 0x01:
+      payload.append(std::string{0x06, 0x08, (char)0xff, 0x00, 0x00, 0x00});
+      break;
+    case 0x02:
+      break;
+    default:
+      break;
+    }
+
+  }
+  else if (deviceType == DeviceType::MOVE_HUB_MEDIUM_LINEAR_MOTOR)
+  {
+    log_d("get port info hub mot: %x", informationType);
+  }
+  else
+  {
+    log_d("get port info %x: %x", deviceType, informationType);
+  }
 
   return payload;
 }
@@ -511,6 +541,19 @@ std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType de
   payload.push_back(port);
   payload.push_back(mode);
   payload.push_back(modeInformationType);
+
+  if (deviceType == DeviceType::MOVE_HUB_TILT_SENSOR)
+  {
+    log_d("get port mode info hub tilt: %x %x", mode, modeInformationType);
+
+    if (mode == 0x00)
+    {
+//    switch (modeInformationType)
+//    {
+//    case 0x00:
+//    }
+    }
+  }
 
   if (deviceType == DeviceType::TRAIN_MOTOR)
   {
