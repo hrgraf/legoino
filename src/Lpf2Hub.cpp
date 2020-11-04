@@ -692,6 +692,22 @@ void Lpf2Hub::notifyCallback(
         parsePortAction(pData);
         break;
     }
+    case (byte)MessageType::PORT_INFORMATION:
+    {
+        Serial.printf("port info (%d bytes):", length);
+        for (int i=0; i<length; i++)
+        Serial.printf(" %02X", pData[i]);
+        Serial.println();
+        break;
+    }
+    case (byte)MessageType::PORT_MODE_INFORMATION:
+    {
+        Serial.printf("port mode info (%d bytes):", length);
+        for (int i=0; i<length; i++)
+        Serial.printf(" %02X", pData[i]);
+        Serial.println();
+        break;
+    }    
     }
 }
 
