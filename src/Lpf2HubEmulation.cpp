@@ -14,9 +14,11 @@
 
 #include "Lpf2HubEmulation.h"
 
-//#define VERBOSE
-//#undef log_d
-//#define log_d(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(D, format), ##__VA_ARGS__)
+#define VERBOSE
+#undef log_d
+#undef log_w
+#define log_d(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(D, format), ##__VA_ARGS__)
+#define log_w(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(W, format), ##__VA_ARGS__)
 
 class Lpf2HubServerCallbacks : public NimBLEServerCallbacks
 {
@@ -283,7 +285,7 @@ void Lpf2HubEmulation::detachDevice(byte port)
  */
 byte Lpf2HubEmulation::getDeviceTypeForPort(byte portNumber)
 {
-  log_d("Number of connected devices: %d", numberOfConnectedDevices);
+  log_v("Number of connected devices: %d", numberOfConnectedDevices);
   for (int idx = 0; idx < numberOfConnectedDevices; idx++)
   {
     log_v("device %d, port number: %x, device type: %x", idx, connectedDevices[idx].PortNumber, connectedDevices[idx].DeviceType);
@@ -476,8 +478,6 @@ void Lpf2HubEmulation::start()
 
 std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, byte port, byte informationType)
 {
-  delay(100);
-
   std::string payload;
   payload.push_back(port);
   payload.push_back(informationType);
@@ -537,8 +537,6 @@ std::string Lpf2HubEmulation::getPortInformationPayload(DeviceType deviceType, b
 
 std::string Lpf2HubEmulation::getPortModeInformationRequestPayload(DeviceType deviceType, byte port, byte mode, byte modeInformationType)
 {
-  delay(100);
-
   std::string payload;
   payload.push_back(port);
   payload.push_back(mode);
