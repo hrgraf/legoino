@@ -323,6 +323,15 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
 #endif
 }
 
+void Lpf2HubEmulation::setHubTilt(byte port, int8_t x, int8_t y)
+{
+  std::string payload;
+  payload.push_back(port);
+  payload.push_back(x);
+  payload.push_back(y);
+  writeValue(MessageType::PORT_VALUE_SINGLE, payload);
+}
+
 void Lpf2HubEmulation::setHubButton(bool pressed)
 {
   std::string payload;

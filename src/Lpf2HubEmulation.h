@@ -68,6 +68,7 @@ public:
   void setHubFirmwareVersion(Version version);
   void setHubHardwareVersion(Version version);
   void setHubButton(bool pressed);
+  void setHubTilt(byte port, int8_t x, int8_t y);
 
   void attachDevice(byte port, DeviceType deviceType);
   void detachDevice(byte port);
