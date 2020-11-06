@@ -8,6 +8,12 @@
 
 #include "Lpf2Hub.h"
 
+#define VERBOSE
+//#undef log_d
+//#undef log_w
+//#define log_d(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(D, format), ##__VA_ARGS__)
+//#define log_w(format, ...) log_printf(ARDUHAL_SHORT_LOG_FORMAT(W, format), ##__VA_ARGS__)
+
 /**
  * Derived class which could be added as an instance to the BLEClient for callback handling
  * The current hub is given as a parameter in the constructor to be able to set the 
@@ -105,6 +111,15 @@ void Lpf2Hub::WriteValue(byte command[], int size)
 {
     byte commandWithCommonHeader[size + 2] = {(byte)(size + 2), 0x00};
     memcpy(commandWithCommonHeader + 2, command, size);
+
+#ifdef VERBOSE
+  int len = size + 2;
+  Serial.printf("writing message (%2d bytes):", len);
+  for (int i=0; i<len; i++)
+  Serial.printf("-%02X", commandWithCommonHeader[i]);
+  Serial.println();
+#endif
+
     _pRemoteCharacteristic->writeValue(commandWithCommonHeader, sizeof(commandWithCommonHeader), false);
 }
 
@@ -668,7 +683,15 @@ void Lpf2Hub::notifyCallback(
     size_t length,
     bool isNotify)
 {
+#ifdef VERBOSE
+    int len = length;
+    Serial.printf("receive message (%2d bytes):", len);
+    for (int i=0; i<len; i++)
+      Serial.printf("-%02X", pData[i]);
+    Serial.println();
+#else
     log_d("notify callback for characteristic %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
+#endif
 
     switch (pData[2])
     {

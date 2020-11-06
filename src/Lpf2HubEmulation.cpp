@@ -65,9 +65,9 @@ public:
     {
 #ifdef VERBOSE
       int len = msgReceived.length();
-      Serial.printf("message received (%d bytes):", len);
+      Serial.printf("receive message (%2d bytes):", len);
       for (int i=0; i<len; i++)
-        Serial.printf(" %02X", msgReceived[i]);
+        Serial.printf("-%02X", msgReceived[i]);
       Serial.println();
 #else      
       log_d("message received: %s", msgReceived.c_str());
@@ -94,14 +94,39 @@ public:
         _lpf2HubEmulation->writeValue(MessageType::PORT_INFORMATION, payload);
       }
 
+      // handle port input format setup requests
+      else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_SINGLE)
+      {
+        //byte port = msgReceived[0x03];
+        //byte deviceType = _lpf2HubEmulation->getDeviceTypeForPort(port);
+        //byte mode = msgReceived[0x04];
+        //byte notify = msgReceived[0x09];
+        std::string payload;
+        payload.append(msgReceived, 3, msgReceived[0]-3);
+        _lpf2HubEmulation->writeValue(MessageType::PORT_INPUT_FORMAT_SINGLE, payload); // confirm
+      }
+      else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::PORT_INPUT_FORMAT_SETUP_COMBINEDMODE)
+      {
+        //byte port = msgReceived[0x03];
+        //byte deviceType = _lpf2HubEmulation->getDeviceTypeForPort(port);
+        std::string payload;
+        payload.append(msgReceived, 3, msgReceived[0]-3);
+        _lpf2HubEmulation->writeValue(MessageType::PORT_INPUT_FORMAT_COMBINEDMODE, payload); // confirm
+      }
+
       // handle alert response (respond always with status OK)
       else if (msgReceived[(byte)MessageHeader::MESSAGE_TYPE] == (byte)MessageType::HUB_ALERTS)
       {
         if (msgReceived[0x04] == 0x03)
         {
-          byte feedback[] = {0x06, 0x00, 0x03, msgReceived[0x03], 0x04, 0x00};
-          _lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
-          _lpf2HubEmulation->pCharacteristic->notify();
+          //byte feedback[] = {0x06, 0x00, 0x03, msgReceived[0x03], 0x04, 0x00};
+          //_lpf2HubEmulation->pCharacteristic->setValue(feedback, sizeof(feedback));
+          //_lpf2HubEmulation->pCharacteristic->notify();
+          std::string payload;
+          payload.push_back(msgReceived[3]);
+          payload.push_back(0x04); // Update (upstream)
+          payload.push_back(0x00); // OK
+          _lpf2HubEmulation->writeValue(MessageType::HUB_ALERTS, payload); // confirm
         }
       }
 
@@ -314,9 +339,9 @@ void Lpf2HubEmulation::writeValue(MessageType messageType, std::string payload, 
   }
 #ifdef VERBOSE
   int len = message.length();
-  Serial.printf("write message (%d bytes):", len);
+  Serial.printf("writing message (%2d bytes):", len);
   for (int i=0; i<len; i++)
-  Serial.printf(" %02X", message[i]);
+  Serial.printf("-%02X", message[i]);
   Serial.println();
 #else
   log_d("write message (%d): %s", message.length(), message);
